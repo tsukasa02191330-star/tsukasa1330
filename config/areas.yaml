@@ -1,0 +1,11 @@
+# 対象エリア (首都圏 4 都県)
+# run_collect.py の --areas で指定するキーと、表示用の日本語名
+areas:
+  tokyo:
+    ja: 東京都
+  kanagawa:
+    ja: 神奈川県
+  saitama:
+    ja: 埼玉県
+  chiba:
+    ja: 千葉県
