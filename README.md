@@ -16,7 +16,7 @@ Slack 承認フローを介してメール/問い合わせフォームに自動�
 
 | STEP | 内容 | 状態 |
 |------|------|------|
-| 1 | 宅建業者タブ・東京都 100 件 (Serper) を Excel に出力 | **実装済** |
+| 1 | 宅建業者タブ・東京都 (Playwright で Google Maps 収集) を Excel に出力 | **実装済** |
 | 2 | 宅建業者タブを神奈川・埼玉・千葉に拡張 | 未着手 |
 | 3 | 士業タブを追加 (司法書士/税理士/弁護士/行政書士) | 未着手 |
 | 4 | 相続専門業者タブを追加 | 未着手 |
@@ -37,14 +37,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`.env.example` を `.env` にコピーして API キーを設定:
+Playwright 用の Chromium を初回のみインストール:
 
 ```bash
-cp .env.example .env
-# エディタで SERPER_API_KEY= を埋める
+playwright install chromium
 ```
 
-Serper API キーは https://serper.dev で発行してください (無料枠あり)。
+> STEP 1 時点では `.env` に必須の値はありません (API キー不要)。
 
 ---
 
@@ -63,10 +62,10 @@ Serper API キーは https://serper.dev で発行してください (無料枠�
 │   ├── robots.py            # robots.txt 許可チェック
 │   ├── extract_contacts.py  # HP から email / フォーム URL / 担当者名を抽出
 │   ├── excel_io.py          # Excel (.xlsx) 多タブ UPSERT
-│   ├── serper.py            # Serper API (Google Maps) ラッパー
+│   ├── gmaps_playwright.py  # Playwright Chromium で Google Maps を操作
 │   └── collectors/
 │       ├── base.py          # Record / エリアマップ
-│       └── takken_serper.py # 宅建業者 × Serper
+│       └── takken_gmaps.py  # 宅建業者 × Google Maps (Playwright)
 ├── scripts/
 │   └── run_collect.py       # 収集オーケストレーター
 ├── templates/outreach_ja.txt  # 送信用の日本語文案 (STEP 8 で使用)
@@ -76,7 +75,11 @@ Serper API キーは https://serper.dev で発行してください (無料枠�
 
 ---
 
-## STEP 1: 宅建業者タブ × 東京都 × 100 件
+## STEP 1: 宅建業者タブ × 東京都 (Playwright で Google Maps 収集)
+
+Google Maps を Playwright Chromium で操作して業者名・HP を取得し、
+そのあと各 HP から email / 問い合わせフォーム URL / 担当者名を抽出する。
+API キー不要。
 
 ### 使い方
 
@@ -86,6 +89,9 @@ python scripts/run_collect.py --tab takken --areas tokyo --limit 5
 
 # 本番 (100 件、limits.yaml の値を使用)
 python scripts/run_collect.py --tab takken --areas tokyo
+
+# トラブルシュート: ブラウザを可視化して目視確認
+python scripts/run_collect.py --tab takken --areas tokyo --limit 5 --headful
 ```
 
 ### 出力
@@ -104,7 +110,7 @@ python scripts/run_collect.py --tab takken --areas tokyo
 | 4 | メールアドレス | 複数は `;` 区切り |
 | 5 | 問い合わせフォームURL | 取得できた場合のみ |
 | 6 | HP | Serper Places の website |
-| 7 | 出典 | 例: `Serper/GoogleMaps:不動産` |
+| 7 | 出典 | 例: `GoogleMaps:不動産` |
 | 8 | ステータス | STEP 10 で更新 |
 | 9 | 送信日時 | STEP 10 で更新 |
 | 10 | 送信方式 | mail / form (STEP 10) |

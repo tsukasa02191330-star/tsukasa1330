@@ -1,21 +1,25 @@
-"""営業リスト収集オーケストレーター (段階実装版)。
+"""営業リスト収集オーケストレーター (段階実装 / Playwright 版)。
 
 Usage (STEP 1):
-    python scripts/run_collect.py --tab takken --areas tokyo
+    python scripts/run_collect.py --tab takken --areas tokyo --limit 5
 
 Optional:
     --limit N             YAML の limits を上書きし、各 area で N 件だけ取得
-    --skip-contacts       HP からの email/form/担当者名 抽出をスキップ (Serper のみ)
+    --skip-contacts       HP からの email/form/担当者名 抽出をスキップ
+    --headful             ブラウザを可視化 (デバッグ用)
     --output PATH         出力 xlsx (default: data/sales_list.xlsx)
     --log-dir DIR         ログ出力先 (default: logs)
 
 入力:
-    .env                  SERPER_API_KEY を定義
     config/limits.yaml    タブ × 都県 ごとの件数上限
 
 出力:
     data/sales_list.xlsx の対応タブに UPSERT
     logs/run_YYYYMMDD_HHMMSS.log
+
+依存:
+    pip install -r requirements.txt
+    playwright install chromium   # 初回のみ
 """
 
 from __future__ import annotations
@@ -36,21 +40,20 @@ if _ROOT not in sys.path:
 import yaml  # noqa: E402
 
 from src import excel_io, extract_contacts  # noqa: E402
-from src.collectors import takken_serper  # noqa: E402
+from src.collectors import takken_gmaps  # noqa: E402
 from src.collectors.base import AREA_TO_PREF, Record  # noqa: E402
+from src.gmaps_playwright import GoogleMapsScraper, is_available  # noqa: E402
 from src.http_client import RateLimitedClient  # noqa: E402
 from src.robots import RobotsChecker  # noqa: E402
-from src.serper import SerperClient, SerperConfigError  # noqa: E402
 
 
 SUPPORTED_AREAS = tuple(AREA_TO_PREF.keys())
 
 # タブキー -> (Excel タブ名, collector モジュール list)
-# STEP 1 では takken のみ。以降の STEP で拡張する。
 TAB_CONFIG: Dict[str, Dict] = {
     "takken": {
         "sheet": "宅建業者",
-        "collectors": [takken_serper],
+        "collectors": [takken_gmaps],
     },
 }
 
@@ -94,7 +97,7 @@ def _parse_csv(value: str, allowed, name: str) -> List[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="営業リスト収集 (段階実装)")
+    parser = argparse.ArgumentParser(description="営業リスト収集 (Playwright 版)")
     parser.add_argument(
         "--tab",
         required=True,
@@ -127,6 +130,17 @@ def main() -> int:
         action="store_true",
         help="HP からの email/form/担当者名 抽出をスキップ",
     )
+    parser.add_argument(
+        "--headful",
+        action="store_true",
+        help="ブラウザを可視化 (デバッグ用)。デフォルトは headless",
+    )
+    parser.add_argument(
+        "--gmaps-delay",
+        type=float,
+        default=1.5,
+        help="Google Maps 上の 1 アクションあたりの遅延秒 (default: 1.5)",
+    )
     args = parser.parse_args()
 
     log_path = _setup_logging(args.log_dir)
@@ -148,15 +162,10 @@ def main() -> int:
         args.tab, sheet_name, areas, area_limits, args.skip_contacts,
     )
 
-    # Serper API キーチェック (未設定なら早期エラー)
-    try:
-        serper = SerperClient()
-    except SerperConfigError as exc:
-        logger.error("Serper 設定エラー: %s", exc)
+    if not is_available():
         logger.error(
-            "解消手順: (1) https://serper.dev でキー発行 "
-            "(2) リポジトリ直下に .env を作成し SERPER_API_KEY=xxxxx を追記 "
-            "(3) 再実行"
+            "playwright が未インストールです。"
+            "`pip install -r requirements.txt && playwright install chromium` を実行してください"
         )
         return 2
 
@@ -165,41 +174,51 @@ def main() -> int:
 
     all_rows: List[Dict[str, str]] = []
     total = 0
-    for area in areas:
-        limit = area_limits.get(area, 0)
-        if limit == 0 and args.limit is None:
-            logger.info("area=%s は limits.yaml で 0 のためスキップ (STEP 未有効化)", area)
-            continue
 
-        logger.info("==== area=%s (limit=%s) 開始 ====", area, limit or "∞")
-        for collector in collectors:
-            for rec in collector.iter_records(serper, area, limit):
-                assert isinstance(rec, Record)
-                row = rec.as_row()
-                if not args.skip_contacts and rec.website:
-                    try:
-                        info = extract_contacts.extract(http_client, robots, rec.website)
-                        row["メールアドレス"] = ";".join(info.emails)
-                        row["問い合わせフォームURL"] = info.contact_form_url or ""
-                        row["担当者名"] = info.representative or ""
-                    except Exception as exc:  # noqa: BLE001
-                        logger.warning(
-                            "連絡先抽出に失敗 company=%s url=%s (%s)",
-                            rec.company, rec.website, exc,
-                        )
-                all_rows.append(row)
-                total += 1
+    with GoogleMapsScraper(
+        headless=not args.headful,
+        per_action_delay_sec=args.gmaps_delay,
+    ) as gm:
+        for area in areas:
+            limit = area_limits.get(area, 0)
+            if limit == 0 and args.limit is None:
                 logger.info(
-                    "[%d] %s | %s | 担当=%s | email=%s | form=%s",
-                    total, rec.company, rec.website or "-",
-                    row["担当者名"] or "-",
-                    row["メールアドレス"] or "-",
-                    row["問い合わせフォームURL"] or "-",
+                    "area=%s は limits.yaml で 0 のためスキップ (STEP 未有効化)", area
                 )
+                continue
+
+            logger.info("==== area=%s (limit=%s) 開始 ====", area, limit or "∞")
+            for collector in collectors:
+                for rec in collector.iter_records(gm, area, limit):
+                    assert isinstance(rec, Record)
+                    row = rec.as_row()
+                    if not args.skip_contacts and rec.website:
+                        try:
+                            info = extract_contacts.extract(
+                                http_client, robots, rec.website
+                            )
+                            row["メールアドレス"] = ";".join(info.emails)
+                            row["問い合わせフォームURL"] = info.contact_form_url or ""
+                            row["担当者名"] = info.representative or ""
+                        except Exception as exc:  # noqa: BLE001
+                            logger.warning(
+                                "連絡先抽出に失敗 company=%s url=%s (%s)",
+                                rec.company, rec.website, exc,
+                            )
+                    all_rows.append(row)
+                    total += 1
+                    logger.info(
+                        "[%d] %s | %s | 担当=%s | email=%s | form=%s",
+                        total, rec.company, rec.website or "-",
+                        row["担当者名"] or "-",
+                        row["メールアドレス"] or "-",
+                        row["問い合わせフォームURL"] or "-",
+                    )
 
     if not all_rows:
         logger.warning(
-            "取得件数 0。Serper のレスポンスや limits.yaml の設定を確認してください。"
+            "取得件数 0。Google Maps のレイアウト変更やブロックを確認してください。"
+            " --headful でブラウザ表示しつつ再実行すると原因を特定しやすいです。"
         )
         return 1
 
