@@ -49,6 +49,35 @@ _EXCLUDE_EMAIL_DOMAINS = {
 class ContactInfo:
     emails: List[str]
     contact_form_url: Optional[str]
+    representative: Optional[str] = None
+
+
+# 担当者・代表者名を抽出するためのキーワードと正規表現
+_REP_KEYWORDS = ("代表取締役", "代表者", "代表 ", "店長", "所長", "担当者", "担当 ")
+# 日本人氏名: 漢字 or ひらがな or カタカナ 2〜5 文字 + スペース + 同 1〜10 文字
+_REP_NAME_RE = re.compile(
+    r"[一-龥々ぁ-んァ-ヴー]{1,6}[\s　]{0,2}[一-龥々ぁ-んァ-ヴー]{1,6}"
+)
+
+
+def _extract_representative(text: str) -> Optional[str]:
+    """HP 本文から代表者 / 担当者名を軽量に抽出する (ベストエフォート)。"""
+    if not text:
+        return None
+    for kw in _REP_KEYWORDS:
+        idx = text.find(kw)
+        if idx < 0:
+            continue
+        window = text[idx : idx + 80]
+        # キーワード直後から氏名候補を探す
+        tail = window[len(kw):]
+        m = _REP_NAME_RE.search(tail)
+        if m:
+            name = m.group(0).strip()
+            # 明らかに会社名っぽい長いものや1文字だけは除外
+            if 2 <= len(name.replace(" ", "").replace("　", "")) <= 12:
+                return f"{kw.strip()} {name}".strip()
+    return None
 
 
 def _same_host(a: str, b: str) -> bool:
@@ -117,6 +146,7 @@ def extract(
 
     emails: List[str] = []
     form_url: Optional[str] = None
+    rep_name: Optional[str] = None
 
     # Step 1: トップページ
     if not robots.allowed(site_url):
@@ -136,6 +166,9 @@ def extract(
 
     if _page_has_contact_form(resp.text):
         form_url = site_url
+
+    if rep_name is None:
+        rep_name = _extract_representative(soup.get_text("\n"))
 
     # Step 2: 問い合わせ系リンクを辿る (深さ 1)
     candidates = _find_contact_candidates(soup, site_url)
@@ -157,6 +190,8 @@ def extract(
         )
         if form_url is None and _page_has_contact_form(cresp.text):
             form_url = cand
+        if rep_name is None:
+            rep_name = _extract_representative(csoup.get_text("\n"))
         # 問い合わせページとメール両方揃ったら早期終了
         if form_url is not None and emails:
             break
@@ -169,4 +204,4 @@ def extract(
             continue
         seen.add(e)
         dedup.append(e)
-    return ContactInfo(emails=dedup, contact_form_url=form_url)
+    return ContactInfo(emails=dedup, contact_form_url=form_url, representative=rep_name)

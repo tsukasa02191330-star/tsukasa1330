@@ -1,0 +1,34 @@
+# タブ × 都県ごとの収集件数上限。
+# 0 は無制限 (Serper が返す限り全件)。
+# STEP 1 では takken × tokyo = 100 のみ有効。
+# 以降の STEP で他の値を順次引き上げていく。
+
+takken:            # 宅建業者
+  tokyo: 100
+  kanagawa: 0
+  saitama: 0
+  chiba: 0
+
+shigyo:            # 士業 (STEP 3 で有効化)
+  tokyo: 0
+  kanagawa: 0
+  saitama: 0
+  chiba: 0
+
+souzoku:           # 相続専門業者 (STEP 4 で有効化)
+  tokyo: 0
+  kanagawa: 0
+  saitama: 0
+  chiba: 0
+
+chintai:           # 賃貸管理会社 (STEP 5 で有効化)
+  tokyo: 0
+  kanagawa: 0
+  saitama: 0
+  chiba: 0
+
+hoken:             # 保険代理店 (STEP 5 で有効化)
+  tokyo: 0
+  kanagawa: 0
+  saitama: 0
+  chiba: 0
