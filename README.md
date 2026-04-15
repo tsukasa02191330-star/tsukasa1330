@@ -17,10 +17,10 @@ Slack 承認フローを介してメール/問い合わせフォームに自動�
 | STEP | 内容 | 状態 |
 |------|------|------|
 | 1 | 宅建業者タブ・東京都 (Playwright で Google Maps 収集) を Excel に出力 | **実装済** |
-| 2 | 宅建業者タブを神奈川・埼玉・千葉に拡張 | 未着手 |
-| 3 | 士業タブを追加 (司法書士/税理士/弁護士/行政書士) | 未着手 |
-| 4 | 相続専門業者タブを追加 | 未着手 |
-| 5 | 賃貸管理会社・保険代理店タブを追加 | 未着手 |
+| 2 | 宅建業者タブを神奈川・埼玉・千葉に拡張 | limits.yaml を書換えれば実行可 |
+| 3 | 士業タブ (司法書士/税理士/弁護士/行政書士) | **実装済** |
+| 4 | 相続専門業者タブ (遺品整理/相続コンサル/相続専門) | **実装済** |
+| 5 | 賃貸管理会社・保険代理店タブ | **実装済** |
 | 6 | 国交省・協会サイトの補完ソースを追加 | 未着手 |
 | 7 | Slack Bot (Socket Mode) による承認 UI | 未着手 |
 | 8 | メール送信 (SMTP / SendGrid 切替) | 未着手 |
@@ -64,8 +64,12 @@ playwright install chromium
 │   ├── excel_io.py          # Excel (.xlsx) 多タブ UPSERT
 │   ├── gmaps_playwright.py  # Playwright Chromium で Google Maps を操作
 │   └── collectors/
-│       ├── base.py          # Record / エリアマップ
-│       └── takken_gmaps.py  # 宅建業者 × Google Maps (Playwright)
+│       ├── base.py           # Record / エリアマップ
+│       ├── takken_gmaps.py   # 宅建業者 × Google Maps
+│       ├── shigyo_gmaps.py   # 士業 × Google Maps
+│       ├── souzoku_gmaps.py  # 相続専門業者 × Google Maps
+│       ├── chintai_gmaps.py  # 賃貸管理会社 × Google Maps
+│       └── hoken_gmaps.py    # 保険代理店 × Google Maps
 ├── scripts/
 │   └── run_collect.py       # 収集オーケストレーター
 ├── templates/outreach_ja.txt  # 送信用の日本語文案 (STEP 8 で使用)
@@ -75,7 +79,7 @@ playwright install chromium
 
 ---
 
-## STEP 1: 宅建業者タブ × 東京都 (Playwright で Google Maps 収集)
+## 収集: 全 5 タブ (Playwright + Google Maps)
 
 Google Maps を Playwright Chromium で操作して業者名・HP を取得し、
 そのあと各 HP から email / 問い合わせフォーム URL / 担当者名を抽出する。
@@ -84,15 +88,33 @@ API キー不要。
 ### 使い方
 
 ```bash
-# まず小さく動作確認 (5 件)
-python scripts/run_collect.py --tab takken --areas tokyo --limit 5
+# まず小さく動作確認 (各 5 件)
+python scripts/run_collect.py --tab takken  --areas tokyo --limit 5
+python scripts/run_collect.py --tab shigyo  --areas tokyo --limit 5
+python scripts/run_collect.py --tab souzoku --areas tokyo --limit 5
+python scripts/run_collect.py --tab chintai --areas tokyo --limit 5
+python scripts/run_collect.py --tab hoken   --areas tokyo --limit 5
 
-# 本番 (100 件、limits.yaml の値を使用)
-python scripts/run_collect.py --tab takken --areas tokyo
+# 本番 (限度は limits.yaml の値、東京都 100 件)
+python scripts/run_collect.py --tab takken  --areas tokyo
+python scripts/run_collect.py --tab shigyo  --areas tokyo
+python scripts/run_collect.py --tab souzoku --areas tokyo
+python scripts/run_collect.py --tab chintai --areas tokyo
+python scripts/run_collect.py --tab hoken   --areas tokyo
 
 # トラブルシュート: ブラウザを可視化して目視確認
 python scripts/run_collect.py --tab takken --areas tokyo --limit 5 --headful
 ```
+
+### タブ一覧
+
+| `--tab` | Excel タブ名 | 検索キーワード |
+|---------|-------------|---------------|
+| `takken`  | 宅建業者 | 不動産 / 不動産買取 / 不動産仲介 |
+| `shigyo`  | 士業 | 司法書士 / 税理士 / 弁護士 / 行政書士 |
+| `souzoku` | 相続専門業者 | 遺品整理 / 相続コンサル / 相続専門 |
+| `chintai` | 賃貸管理会社 | 賃貸管理会社 / 賃貸管理 / プロパティマネジメント |
+| `hoken`   | 保険代理店 | 保険代理店 / 生命保険代理店 / 損害保険代理店 |
 
 ### 出力
 

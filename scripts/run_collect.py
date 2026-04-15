@@ -40,7 +40,13 @@ if _ROOT not in sys.path:
 import yaml  # noqa: E402
 
 from src import excel_io, extract_contacts  # noqa: E402
-from src.collectors import takken_gmaps  # noqa: E402
+from src.collectors import (  # noqa: E402
+    chintai_gmaps,
+    hoken_gmaps,
+    shigyo_gmaps,
+    souzoku_gmaps,
+    takken_gmaps,
+)
 from src.collectors.base import AREA_TO_PREF, Record  # noqa: E402
 from src.gmaps_playwright import GoogleMapsScraper, is_available  # noqa: E402
 from src.http_client import RateLimitedClient  # noqa: E402
@@ -54,6 +60,22 @@ TAB_CONFIG: Dict[str, Dict] = {
     "takken": {
         "sheet": "宅建業者",
         "collectors": [takken_gmaps],
+    },
+    "shigyo": {
+        "sheet": "士業",
+        "collectors": [shigyo_gmaps],
+    },
+    "souzoku": {
+        "sheet": "相続専門業者",
+        "collectors": [souzoku_gmaps],
+    },
+    "chintai": {
+        "sheet": "賃貸管理会社",
+        "collectors": [chintai_gmaps],
+    },
+    "hoken": {
+        "sheet": "保険代理店",
+        "collectors": [hoken_gmaps],
     },
 }
 
@@ -102,7 +124,10 @@ def main() -> int:
         "--tab",
         required=True,
         choices=list(TAB_CONFIG.keys()),
-        help=f"対象タブ。STEP 1 は {list(TAB_CONFIG.keys())} のみ",
+        help=(
+            "対象タブ。takken=宅建業者 / shigyo=士業 / souzoku=相続専門業者 / "
+            "chintai=賃貸管理会社 / hoken=保険代理店"
+        ),
     )
     parser.add_argument(
         "--areas",
