@@ -1,33 +1,37 @@
 # タブ × 都県ごとの収集件数上限。
 # 0 は「limits.yaml の値としてスキップ」(--limit で上書きすれば動く)。
-# 段階展開: まずは tokyo=100 で動作確認、OK なら他県を 100 に上げる。
+#
+# 一都三県 (東京・神奈川・埼玉・千葉) 全域を 100 件ずつで有効化。
+# 理論最大 = 5 タブ × 4 県 × 100 = 2000 行。
+# 上限を下げたい場合は `--limit N` で個別に上書き、
+# 完全に止めたいエリアは 0 に戻す。
 
 takken:            # 宅建業者
   tokyo: 100
-  kanagawa: 0
-  saitama: 0
-  chiba: 0
+  kanagawa: 100
+  saitama: 100
+  chiba: 100
 
 shigyo:            # 士業 (司法書士/税理士/弁護士/行政書士)
   tokyo: 100
-  kanagawa: 0
-  saitama: 0
-  chiba: 0
+  kanagawa: 100
+  saitama: 100
+  chiba: 100
 
 souzoku:           # 相続専門業者
   tokyo: 100
-  kanagawa: 0
-  saitama: 0
-  chiba: 0
+  kanagawa: 100
+  saitama: 100
+  chiba: 100
 
 chintai:           # 賃貸管理会社
   tokyo: 100
-  kanagawa: 0
-  saitama: 0
-  chiba: 0
+  kanagawa: 100
+  saitama: 100
+  chiba: 100
 
 hoken:             # 保険代理店 (生保/損保)
   tokyo: 100
-  kanagawa: 0
-  saitama: 0
-  chiba: 0
+  kanagawa: 100
+  saitama: 100
+  chiba: 100
