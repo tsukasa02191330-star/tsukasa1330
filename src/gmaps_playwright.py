@@ -128,7 +128,16 @@ class GoogleMapsScraper:
         query: str,
         max_results: int = 5,
     ) -> Iterator[GMapsPlace]:
-        """Google Maps で query を検索し、上から max_results 件を yield する。"""
+        """Google Maps で query を検索し、上から max_results 件を yield する。
+
+        2 フェーズ方式:
+            フェーズ 1: 結果フィードをスクロールしながら (aria-label, href) を収集する。
+                        place のクリックはしないので、フィードの表示は維持されスクロールが継続できる。
+            フェーズ 2: 集まった href に直接ナビゲートし、詳細パネルの website を取り出す。
+
+        これにより「クリック → 詳細が開いてフィードが隠れる → スクロールできない → 5 件で止まる」
+        という過去の挙動を回避する。
+        """
         if self._page is None:
             raise RuntimeError("GoogleMapsScraper.start() を先に呼んでください")
         page = self._page
@@ -140,7 +149,7 @@ class GoogleMapsScraper:
         # 同意ダイアログ (EU 等) をクリックできればする
         self._try_consent()
 
-        # 結果フィードが出現するまで待つ (検索結果が 1 件だけのときは出ない)
+        # 結果フィードが出現するまで待つ
         feed = self._wait_for_feed(page)
         if feed is None:
             # 単一結果ページにリダイレクトされたケース
@@ -149,52 +158,80 @@ class GoogleMapsScraper:
                 yield GMapsPlace(name=single_name, website=single_web)
             return
 
-        seen_names: set[str] = set()
-        emitted = 0
-        # 最大 15 回までスクロールを試みる
-        for scroll_round in range(15):
-            links = page.query_selector_all(self.PLACE_LINK_SELECTOR)
-            logger.info(
-                "gmaps: scroll=%d 見えているプレイス=%d", scroll_round, len(links)
-            )
+        # ---------------- フェーズ 1: スクロールしながら URL を収集 ----------------
+        # 目標件数の 1.5 倍まで集めておく (重複・リンク切れでドロップする分の余裕)
+        target_collect = max(max_results * 2, max_results + 5) if max_results else 60
+        collected: List[tuple] = []  # [(name, href)]
+        seen_names: set = set()
+        stagnant_rounds = 0
 
-            for idx in range(len(links)):
-                if emitted >= max_results:
-                    return
-                # 毎回再取得 (クリック後に DOM が変わる)
-                links_now = page.query_selector_all(self.PLACE_LINK_SELECTOR)
-                if idx >= len(links_now):
-                    break
-                link = links_now[idx]
+        # スクロール試行は最大 40 回まで (Google Maps は通常 20 件 × 数回で上限に到達)
+        for scroll_round in range(40):
+            links = page.query_selector_all(self.PLACE_LINK_SELECTOR)
+            new_in_round = 0
+            for link in links:
                 try:
                     name = (link.get_attribute("aria-label") or "").strip()
+                    href = (link.get_attribute("href") or "").strip()
                 except Exception:  # noqa: BLE001
-                    name = ""
+                    continue
                 if not name or name in seen_names:
                     continue
-                try:
-                    link.scroll_into_view_if_needed()
-                    link.click()
-                except Exception as exc:  # noqa: BLE001
-                    logger.debug("gmaps: クリック失敗 %s (%s)", name, exc)
+                if not href.startswith("http") or "/maps/place/" not in href:
                     continue
-                time.sleep(self.per_action_delay_sec)
-                website = self._extract_website_from_detail()
                 seen_names.add(name)
-                emitted += 1
-                logger.info(
-                    "gmaps: [%d/%d] %s | HP=%s",
-                    emitted, max_results, name, website or "-",
-                )
-                yield GMapsPlace(name=name, website=website or "")
+                collected.append((name, href))
+                new_in_round += 1
 
-            if emitted >= max_results:
-                return
+            logger.info(
+                "gmaps: scroll=%d 累計収集=%d (+%d, 目標=%d)",
+                scroll_round, len(collected), new_in_round, target_collect,
+            )
 
-            # 結果パネルをスクロールして追加ロード
+            if len(collected) >= target_collect:
+                break
+
+            if new_in_round == 0:
+                stagnant_rounds += 1
+            else:
+                stagnant_rounds = 0
+
             if not self._scroll_feed(page):
-                logger.info("gmaps: これ以上スクロールできない。終了")
+                stagnant_rounds += 1
+
+            # 「リストの最後まで検索しました」を見たら終了
+            if self._is_feed_exhausted(page):
+                logger.info("gmaps: フィード終端 (scrolled=%d, collected=%d)",
+                            scroll_round, len(collected))
+                break
+
+            # 3 連続で新規が出ない場合は打ち切り
+            if stagnant_rounds >= 3:
+                logger.info("gmaps: スクロール停滞 (scrolled=%d, collected=%d)",
+                            scroll_round, len(collected))
+                break
+
+        logger.info("gmaps: フェーズ1 完了 収集=%d (max_results=%d)",
+                    len(collected), max_results)
+
+        # ---------------- フェーズ 2: 各 place URL に直接ナビゲートして website 取得 ----------------
+        emitted = 0
+        for name, href in collected:
+            if max_results and emitted >= max_results:
                 return
+            try:
+                page.goto(href, wait_until="domcontentloaded")
+                time.sleep(self.per_action_delay_sec)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("gmaps: place ナビ失敗 %s (%s)", name, exc)
+                continue
+            website = self._extract_website_from_detail()
+            emitted += 1
+            logger.info(
+                "gmaps: [%d/%d] %s | HP=%s",
+                emitted, max_results or len(collected), name, website or "-",
+            )
+            yield GMapsPlace(name=name, website=website or "")
 
     # ------------------------------------------------------------------
     # helpers
@@ -227,6 +264,19 @@ class GoogleMapsScraper:
         except Exception:  # noqa: BLE001
             pass
         return None
+
+    def _is_feed_exhausted(self, page) -> bool:
+        """Google Maps が「リストの最後まで検索しました」系の文言を出していれば True。"""
+        markers = (
+            "リストの最後まで検索しました",
+            "結果の一覧を表示しています",
+            "You've reached the end of the list",
+        )
+        try:
+            body = page.evaluate("() => document.body.innerText") or ""
+        except Exception:  # noqa: BLE001
+            return False
+        return any(m in body for m in markers)
 
     def _scroll_feed(self, page) -> bool:
         """結果フィードを 1 画面分スクロールする。height が増えれば True。"""
