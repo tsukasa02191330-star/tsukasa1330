@@ -26,6 +26,14 @@ AREA_TO_SERPER_LOCATION = {
     "chiba": "Chiba, Japan",
 }
 
+# JIS 都道府県コード (国交省 etsuran 系で使用)
+AREA_TO_JIS_CODE = {
+    "tokyo": "13",
+    "kanagawa": "14",
+    "saitama": "11",
+    "chiba": "12",
+}
+
 
 @dataclass
 class Record:

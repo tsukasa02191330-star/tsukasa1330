@@ -75,6 +75,7 @@ class RateLimitedClient:
         *,
         headers: Optional[Dict[str, str]] = None,
         allow_redirects: bool = True,
+        params: Optional[Dict[str, str]] = None,
     ) -> requests.Response:
         """URL を GET する。同一ホストは 3 秒以上の間隔を空ける。"""
         host = urlparse(url).netloc
@@ -83,10 +84,40 @@ class RateLimitedClient:
         resp = self._session.get(
             url,
             headers=headers,
+            params=params,
             timeout=self.timeout_sec,
             allow_redirects=allow_redirects,
         )
         if 500 <= resp.status_code < 600:
             # 5xx は ConnectionError 扱いでリトライ対象にする
+            raise requests.ConnectionError(f"status={resp.status_code} url={url}")
+        return resp
+
+    @retry(
+        reraise=True,
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=2, min=2, max=16),
+        retry=retry_if_exception_type((requests.ConnectionError, requests.Timeout)),
+    )
+    def post(
+        self,
+        url: str,
+        *,
+        data: Optional[Dict[str, str]] = None,
+        headers: Optional[Dict[str, str]] = None,
+        allow_redirects: bool = True,
+    ) -> requests.Response:
+        """URL に POST する。同一ホストは 3 秒以上の間隔を空ける。"""
+        host = urlparse(url).netloc
+        self._wait_for_host(host)
+        logger.info("POST %s", url)
+        resp = self._session.post(
+            url,
+            data=data,
+            headers=headers,
+            timeout=self.timeout_sec,
+            allow_redirects=allow_redirects,
+        )
+        if 500 <= resp.status_code < 600:
             raise requests.ConnectionError(f"status={resp.status_code} url={url}")
         return resp
