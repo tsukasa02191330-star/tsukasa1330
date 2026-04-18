@@ -37,8 +37,10 @@ class RobotsChecker:
             self._cache[host_root] = None
             return None
 
-        if resp.status_code == 404:
-            # robots.txt が無い = すべて許可 (慣例)
+        if resp.status_code in (404, 401, 403):
+            # 404: robots.txt が無い = すべて許可 (慣例)
+            # 401/403: robots.txt 自体へのアクセスが禁止されている場合も
+            #          制限内容は不明なので「制限なし」として許可扱い (業界慣例)
             rp = robotparser.RobotFileParser()
             rp.parse([])
             self._cache[host_root] = rp

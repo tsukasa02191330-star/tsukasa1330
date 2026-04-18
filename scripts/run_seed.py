@@ -33,7 +33,10 @@ from src.http_client import RateLimitedClient  # noqa: E402
 from src.robots import RobotsChecker  # noqa: E402
 
 SEEDS_DIR = os.path.join(_ROOT, "data", "seeds")
-DEFAULT_OUTPUT = os.path.join(_ROOT, "data", "sales_list.xlsx")
+DEFAULT_OUTPUT = os.path.join(
+    r"C:\Users\User\Desktop\claude\リスト作成\スプレットシート",
+    "sales_list.xlsx",
+) if os.name == "nt" else os.path.join(_ROOT, "data", "sales_list.xlsx")
 
 TAB_CONFIG = {
     "shigyo":  {"sheet": "士業",       "seed": "shigyo.yaml"},
