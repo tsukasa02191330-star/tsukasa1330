@@ -1,0 +1,103 @@
+# 士業シード (東京都)
+# メール取得率が最も高いタブ (目安 70-80%)
+# ここに追加したい事務所の HP URL を足してください。
+
+- name: 新宿御苑法律事務所
+  url: https://shinjuku-law.jp/
+  pref: 東京都
+  category: 弁護士
+
+- name: 東京フロンティア法律事務所
+  url: https://t-frontier.jp/
+  pref: 東京都
+  category: 弁護士
+
+- name: ベリーベスト法律事務所
+  url: https://www.vbest.jp/
+  pref: 東京都
+  category: 弁護士
+
+- name: 丸の内中央法律事務所
+  url: https://www.maruno-chuo-law.jp/
+  pref: 東京都
+  category: 弁護士
+
+- name: 弁護士法人アドバンス
+  url: https://www.advance-law.jp/
+  pref: 東京都
+  category: 弁護士
+
+- name: 司法書士法人 みつわ合同事務所
+  url: https://www.mitsuwa-office.jp/
+  pref: 東京都
+  category: 司法書士
+
+- name: 司法書士法人 東京合同事務所
+  url: https://www.t-godo.jp/
+  pref: 東京都
+  category: 司法書士
+
+- name: 司法書士法人 新宿事務所
+  url: https://www.shinjuku-shiho.com/
+  pref: 東京都
+  category: 司法書士
+
+- name: 鈴木司法書士事務所
+  url: https://www.suzuki-shiho.jp/
+  pref: 東京都
+  category: 司法書士
+
+- name: 渋谷司法書士事務所
+  url: https://shibuya-shiho.jp/
+  pref: 東京都
+  category: 司法書士
+
+- name: 辻・本郷 税理士法人
+  url: https://www.ht-tax.or.jp/
+  pref: 東京都
+  category: 税理士
+
+- name: 税理士法人チェスター
+  url: https://chester-tax.com/
+  pref: 東京都
+  category: 税理士
+
+- name: AGSコンサルティング税理士法人
+  url: https://www.agscon.co.jp/
+  pref: 東京都
+  category: 税理士
+
+- name: クロスト税理士事務所
+  url: https://www.xrost-tax.jp/
+  pref: 東京都
+  category: 税理士
+
+- name: 渋谷税理士事務所
+  url: https://shibuya-zeirishi.jp/
+  pref: 東京都
+  category: 税理士
+
+- name: 東京都行政書士会 港支部
+  url: https://www.tokyo-gyosei.or.jp/
+  pref: 東京都
+  category: 行政書士
+
+- name: 行政書士法人 みらい
+  url: https://www.mirai-office.jp/
+  pref: 東京都
+  category: 行政書士
+
+- name: 東京みなと行政書士事務所
+  url: https://www.tokyo-minato-gyosei.jp/
+  pref: 東京都
+  category: 行政書士
+
+- name: 行政書士 渡辺事務所
+  url: https://watanabe-gyosei.jp/
+  pref: 東京都
+  category: 行政書士
+
+- name: 銀座行政書士事務所
+  url: https://ginza-gyosei.jp/
+  pref: 東京都
+  category: 行政書士

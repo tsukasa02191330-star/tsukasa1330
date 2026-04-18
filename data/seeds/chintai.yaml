@@ -1,0 +1,78 @@
+# 賃貸管理会社シード (東京都)
+# メール取得率目安: 25-40% (問い合わせフォーム主体が多い)
+# メールアドレス目的であれば、管理部・総務部宛のフォーム URL を優先で収集。
+
+- name: 大東建託パートナーズ株式会社
+  url: https://www.kentaku-partners.com/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: レオパレス21
+  url: https://www.leopalace21.com/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 積水ハウス不動産東京株式会社
+  url: https://www.sekisuihouse-fudosan.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 東急住宅リース株式会社
+  url: https://www.tokyu-housing-lease.co.jp/
+  pref: 東京都
+  category: プロパティマネジメント
+
+- name: 三井不動産レジデンシャルリース株式会社
+  url: https://www.mfr.co.jp/
+  pref: 東京都
+  category: プロパティマネジメント
+
+- name: 株式会社日本ハウズイング
+  url: https://www.nippon-housing.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 旭化成不動産レジデンス株式会社
+  url: https://www.asahi-kasei-homes.com/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 東京建物アメニティサポート株式会社
+  url: https://www.tokyo-tatemono-a.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 有限会社フジケン不動産
+  url: https://www.fujiken-fudosan.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 株式会社シノケンプロデュース
+  url: https://www.shinoken.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 株式会社スターツアメニティー
+  url: https://www.starts-amenity.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 株式会社日本管理センター
+  url: https://www.nihon-kanri.co.jp/
+  pref: 東京都
+  category: 賃貸管理
+
+- name: 住友不動産建物サービス株式会社
+  url: https://www.sbs.sumitomo-rd.co.jp/
+  pref: 東京都
+  category: プロパティマネジメント
+
+- name: 東急コミュニティー株式会社
+  url: https://www.tokyu-com.co.jp/
+  pref: 東京都
+  category: プロパティマネジメント
+
+- name: 株式会社アイケンジャパン
+  url: https://www.aiken-japan.co.jp/
+  pref: 東京都
+  category: 賃貸管理
