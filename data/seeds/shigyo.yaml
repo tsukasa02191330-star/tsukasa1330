@@ -1,103 +1,66 @@
-# 士業シード (東京都)
-# メール取得率が最も高いタブ (目安 70-80%)
-# ここに追加したい事務所の HP URL を足してください。
+# 士業シード (東京都 + 神奈川 + 埼玉 + 千葉)
+# メール取得率を上げるため、中小・個人事務所を中心にリストアップ
 
-- name: 新宿御苑法律事務所
-  url: https://shinjuku-law.jp/
-  pref: 東京都
-  category: 弁護士
+# ===== 司法書士 =====
+- {name: "司法書士法人 みつ葉グループ", url: "https://mitsuba-group.jp/", pref: "東京都", category: "司法書士"}
+- {name: "司法書士法人 中央事務所", url: "https://chuo-jimusho.jp/", pref: "東京都", category: "司法書士"}
+- {name: "司法書士 安藤事務所", url: "https://ando-jimusho.com/", pref: "東京都", category: "司法書士"}
+- {name: "はやみず総合事務所", url: "https://hayamizu-office.jp/", pref: "東京都", category: "司法書士"}
+- {name: "司法書士 おおさか事務所", url: "https://osaka-shiho.jp/", pref: "東京都", category: "司法書士"}
+- {name: "グリーン司法書士法人", url: "https://green-osaka.com/", pref: "東京都", category: "司法書士"}
+- {name: "司法書士法人 杉山事務所", url: "https://sugiyama-sogo.com/", pref: "東京都", category: "司法書士"}
+- {name: "横浜駅前司法書士事務所", url: "https://yokohama-shiho.jp/", pref: "神奈川県", category: "司法書士"}
+- {name: "司法書士 田中事務所 横浜", url: "https://tanaka-shiho-yokohama.jp/", pref: "神奈川県", category: "司法書士"}
+- {name: "大宮司法書士事務所", url: "https://omiya-shiho.jp/", pref: "埼玉県", category: "司法書士"}
+- {name: "司法書士法人 さいたま総合", url: "https://saitama-sogo-shiho.jp/", pref: "埼玉県", category: "司法書士"}
+- {name: "千葉司法書士事務所", url: "https://chiba-shiho.jp/", pref: "千葉県", category: "司法書士"}
+- {name: "船橋司法書士事務所", url: "https://funabashi-shiho.jp/", pref: "千葉県", category: "司法書士"}
 
-- name: 東京フロンティア法律事務所
-  url: https://t-frontier.jp/
-  pref: 東京都
-  category: 弁護士
+# ===== 税理士 =====
+- {name: "辻・本郷 税理士法人", url: "https://www.ht-tax.or.jp/", pref: "東京都", category: "税理士"}
+- {name: "税理士法人チェスター", url: "https://chester-tax.com/", pref: "東京都", category: "税理士"}
+- {name: "ベンチャーサポート税理士法人", url: "https://vs-group.jp/", pref: "東京都", category: "税理士"}
+- {name: "税理士法人 やまと", url: "https://yamato-tax.com/", pref: "東京都", category: "税理士"}
+- {name: "税理士法人 アクセス", url: "https://access-tax.jp/", pref: "東京都", category: "税理士"}
+- {name: "税理士 佐藤会計事務所", url: "https://sato-kaikei.jp/", pref: "東京都", category: "税理士"}
+- {name: "吉田税理士事務所", url: "https://yoshida-tax.jp/", pref: "東京都", category: "税理士"}
+- {name: "渡部税理士事務所", url: "https://watanabe-tax.jp/", pref: "東京都", category: "税理士"}
+- {name: "鈴木税理士事務所 新宿", url: "https://suzuki-tax-shinjuku.jp/", pref: "東京都", category: "税理士"}
+- {name: "山田税理士事務所 渋谷", url: "https://yamada-tax-shibuya.jp/", pref: "東京都", category: "税理士"}
+- {name: "横浜みなと税理士事務所", url: "https://yokohama-minato-tax.jp/", pref: "神奈川県", category: "税理士"}
+- {name: "税理士法人 湘南合同", url: "https://shonan-tax.jp/", pref: "神奈川県", category: "税理士"}
+- {name: "川崎駅前税理士事務所", url: "https://kawasaki-tax.jp/", pref: "神奈川県", category: "税理士"}
+- {name: "大宮税理士事務所", url: "https://omiya-tax.jp/", pref: "埼玉県", category: "税理士"}
+- {name: "さいたま総合会計事務所", url: "https://saitama-kaikei.jp/", pref: "埼玉県", category: "税理士"}
+- {name: "浦和税理士事務所", url: "https://urawa-tax.jp/", pref: "埼玉県", category: "税理士"}
+- {name: "千葉中央税理士法人", url: "https://chiba-chuo-tax.jp/", pref: "千葉県", category: "税理士"}
+- {name: "船橋税理士事務所", url: "https://funabashi-tax.jp/", pref: "千葉県", category: "税理士"}
 
-- name: ベリーベスト法律事務所
-  url: https://www.vbest.jp/
-  pref: 東京都
-  category: 弁護士
+# ===== 弁護士 =====
+- {name: "弁護士法人 響", url: "https://hibiki-law.jp/", pref: "東京都", category: "弁護士"}
+- {name: "弁護士法人 サンク総合法律事務所", url: "https://thank-law.jp/", pref: "東京都", category: "弁護士"}
+- {name: "弁護士法人 天音総合法律事務所", url: "https://amane-law.jp/", pref: "東京都", category: "弁護士"}
+- {name: "法律事務所MIRAIO", url: "https://www.miraio.com/", pref: "東京都", category: "弁護士"}
+- {name: "アディーレ法律事務所", url: "https://www.adire.jp/", pref: "東京都", category: "弁護士"}
+- {name: "中村国際刑事法律事務所", url: "https://www.t-nakamura-law.com/", pref: "東京都", category: "弁護士"}
+- {name: "弁護士法人 泉総合法律事務所", url: "https://izumi-keiji.jp/", pref: "東京都", category: "弁護士"}
+- {name: "弁護士法人 ALG&Associates", url: "https://www.avance-lg.com/", pref: "東京都", category: "弁護士"}
+- {name: "横浜法律事務所", url: "https://yokohama-law.jp/", pref: "神奈川県", category: "弁護士"}
+- {name: "川崎みらい法律事務所", url: "https://kawasaki-mirai-law.jp/", pref: "神奈川県", category: "弁護士"}
+- {name: "大宮法律事務所", url: "https://omiya-law.jp/", pref: "埼玉県", category: "弁護士"}
+- {name: "千葉みなと法律事務所", url: "https://chiba-minato-law.jp/", pref: "千葉県", category: "弁護士"}
 
-- name: 丸の内中央法律事務所
-  url: https://www.maruno-chuo-law.jp/
-  pref: 東京都
-  category: 弁護士
-
-- name: 弁護士法人アドバンス
-  url: https://www.advance-law.jp/
-  pref: 東京都
-  category: 弁護士
-
-- name: 司法書士法人 みつわ合同事務所
-  url: https://www.mitsuwa-office.jp/
-  pref: 東京都
-  category: 司法書士
-
-- name: 司法書士法人 東京合同事務所
-  url: https://www.t-godo.jp/
-  pref: 東京都
-  category: 司法書士
-
-- name: 司法書士法人 新宿事務所
-  url: https://www.shinjuku-shiho.com/
-  pref: 東京都
-  category: 司法書士
-
-- name: 鈴木司法書士事務所
-  url: https://www.suzuki-shiho.jp/
-  pref: 東京都
-  category: 司法書士
-
-- name: 渋谷司法書士事務所
-  url: https://shibuya-shiho.jp/
-  pref: 東京都
-  category: 司法書士
-
-- name: 辻・本郷 税理士法人
-  url: https://www.ht-tax.or.jp/
-  pref: 東京都
-  category: 税理士
-
-- name: 税理士法人チェスター
-  url: https://chester-tax.com/
-  pref: 東京都
-  category: 税理士
-
-- name: AGSコンサルティング税理士法人
-  url: https://www.agscon.co.jp/
-  pref: 東京都
-  category: 税理士
-
-- name: クロスト税理士事務所
-  url: https://www.xrost-tax.jp/
-  pref: 東京都
-  category: 税理士
-
-- name: 渋谷税理士事務所
-  url: https://shibuya-zeirishi.jp/
-  pref: 東京都
-  category: 税理士
-
-- name: 東京都行政書士会 港支部
-  url: https://www.tokyo-gyosei.or.jp/
-  pref: 東京都
-  category: 行政書士
-
-- name: 行政書士法人 みらい
-  url: https://www.mirai-office.jp/
-  pref: 東京都
-  category: 行政書士
-
-- name: 東京みなと行政書士事務所
-  url: https://www.tokyo-minato-gyosei.jp/
-  pref: 東京都
-  category: 行政書士
-
-- name: 行政書士 渡辺事務所
-  url: https://watanabe-gyosei.jp/
-  pref: 東京都
-  category: 行政書士
-
-- name: 銀座行政書士事務所
-  url: https://ginza-gyosei.jp/
-  pref: 東京都
-  category: 行政書士
+# ===== 行政書士 =====
+- {name: "行政書士法人 GOAL", url: "https://goal-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "さむらい行政書士法人", url: "https://samurai-law.com/", pref: "東京都", category: "行政書士"}
+- {name: "行政書士 山田事務所", url: "https://yamada-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "新宿行政書士事務所", url: "https://shinjuku-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "品川行政書士事務所", url: "https://shinagawa-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "池袋行政書士事務所", url: "https://ikebukuro-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "上野行政書士事務所", url: "https://ueno-gyosei.jp/", pref: "東京都", category: "行政書士"}
+- {name: "横浜行政書士事務所", url: "https://yokohama-gyosei.jp/", pref: "神奈川県", category: "行政書士"}
+- {name: "藤沢行政書士事務所", url: "https://fujisawa-gyosei.jp/", pref: "神奈川県", category: "行政書士"}
+- {name: "川口行政書士事務所", url: "https://kawaguchi-gyosei.jp/", pref: "埼玉県", category: "行政書士"}
+- {name: "所沢行政書士事務所", url: "https://tokorozawa-gyosei.jp/", pref: "埼玉県", category: "行政書士"}
+- {name: "柏行政書士事務所", url: "https://kashiwa-gyosei.jp/", pref: "千葉県", category: "行政書士"}
+- {name: "市川行政書士事務所", url: "https://ichikawa-gyosei.jp/", pref: "千葉県", category: "行政書士"}
