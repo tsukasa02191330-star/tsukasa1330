@@ -1,12 +1,33 @@
-# 宅建業者リスト収集ツール (MVP)
+# 一都三県 営業リスト自動化ツール
 
-首都圏(東京・神奈川・埼玉・千葉)の宅建業者情報を収集し、「同業者から仕入れ案件をもらう」ための営業リストを CSV で作成するツールです。
+一都三県 (東京・神奈川・埼玉・千葉) の営業リストを収集し、
+Slack 承認フローを介してメール/問い合わせフォームに自動送信する一気通貫ツール。
 
-> **はじめに読むべき法務・マナー面の注意**
-> - 本ツールは SUUMO / athome / HOME'S などの業者一覧を参照します。**各サービスの利用規約 / robots.txt を実行前に必ずご自身で確認**してください。規約で自動収集が制限されている場合は、`--source kokkosho`(予定)や都道府県の公開名簿に切替えてください。
-> - アクセス間隔は 3 秒 + ジッターで自動制御しています。短縮は相手方のサーバに負担となるため行わないでください。
-> - 収集データは **業者間 (B2B) の仕入れ提案** の用途に限定してください。消費者向けの大量メール送信は特定電子メール法の対象となります。
-> - 取得データの第三者提供・再配布は禁止です。
+広範な仕様のため、**段階的に実装**している。本 README は現在の実装状況を反映する。
+
+> 法務・マナー面の注意
+> - 収集データは **業者間 (B2B) の営業提案** 用途に限定してください。
+> - 各 API / サイトの利用規約・robots.txt を必ず確認してください。
+> - Serper (Google Maps) などのサードパーティ API の利用規約も遵守してください。
+
+---
+
+## 進捗 (STEP ロードマップ)
+
+| STEP | 内容 | 状態 |
+|------|------|------|
+| 1 | 宅建業者タブ・東京都 (Playwright で Google Maps 収集) を Excel に出力 | **実装済** |
+| 2 | 宅建業者タブを神奈川・埼玉・千葉に拡張 | limits.yaml を書換えれば実行可 |
+| 3 | 士業タブ (司法書士/税理士/弁護士/行政書士) | **実装済** |
+| 4 | 相続専門業者タブ (遺品整理/相続コンサル/相続専門) | **実装済** |
+| 5 | 賃貸管理会社・保険代理店タブ | **実装済** |
+| 6 | 国交省・協会サイトの補完ソースを追加 | 未着手 |
+| 7 | Slack Bot (Socket Mode) による承認 UI | 未着手 |
+| 8 | メール送信 (SMTP / SendGrid 切替) | 未着手 |
+| 9 | Playwright によるフォーム自動送信 | 未着手 |
+| 10 | Excel ステータス列の自動更新 | 未着手 |
+
+---
 
 ## セットアップ
 
@@ -16,82 +37,138 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Playwright 用の Chromium を初回のみインストール:
+
+```bash
+playwright install chromium
+```
+
+> STEP 1 時点では `.env` に必須の値はありません (API キー不要)。
+
+---
+
 ## ディレクトリ構成
 
 ```
 .
 ├── README.md
 ├── requirements.txt
-├── config/areas.yaml          # 対象エリア (首都圏4都県)
-├── src/                       # ライブラリ
-│   ├── http_client.py         # レート制御付き HTTP クライアント
-│   ├── robots.py              # robots.txt 許可チェック
-│   ├── portal_suumo.py        # SUUMO アダプタ
-│   ├── portal_athome.py       # athome アダプタ
-│   ├── portal_homes.py        # HOME'S アダプタ
-│   ├── extract_contacts.py    # HP から email / 問合せフォーム URL 抽出
-│   └── storage.py             # CSV 読み書き(UPSERT)
+├── .env.example
+├── config/
+│   ├── areas.yaml           # 都県マッピング
+│   └── limits.yaml          # タブ × 都県ごとの件数上限
+├── src/
+│   ├── http_client.py       # レート制御付き HTTP クライアント
+│   ├── robots.py            # robots.txt 許可チェック
+│   ├── extract_contacts.py  # HP から email / フォーム URL / 担当者名を抽出
+│   ├── excel_io.py          # Excel (.xlsx) 多タブ UPSERT
+│   ├── gmaps_playwright.py  # Playwright Chromium で Google Maps を操作
+│   └── collectors/
+│       ├── base.py           # Record / エリアマップ
+│       ├── takken_gmaps.py   # 宅建業者 × Google Maps
+│       ├── shigyo_gmaps.py   # 士業 × Google Maps
+│       ├── souzoku_gmaps.py  # 相続専門業者 × Google Maps
+│       ├── chintai_gmaps.py  # 賃貸管理会社 × Google Maps
+│       └── hoken_gmaps.py    # 保険代理店 × Google Maps
 ├── scripts/
-│   ├── run_collect.py         # 業者リスト収集(MVP のメイン)
-│   └── run_send_mail.py       # 一斉メール送信(後日実装のスタブ)
-├── templates/outreach_ja.txt  # 送信用の日本語文案
+│   └── run_collect.py       # 収集オーケストレーター
+├── templates/outreach_ja.txt  # 送信用の日本語文案 (STEP 8 で使用)
 └── data/
-    ├── brokers.csv            # 成果物 (実行後に生成)
-    └── brokers_sample.csv     # サンプル 3 行
+    └── sales_list.xlsx      # 成果物 (実行後に生成)
 ```
 
-## 使い方
+---
 
-### 1. まず小さく動かす(推奨)
+## 収集: 全 5 タブ (Playwright + Google Maps)
+
+Google Maps を Playwright Chromium で操作して業者名・HP を取得し、
+そのあと各 HP から email / 問い合わせフォーム URL / 担当者名を抽出する。
+API キー不要。
+
+### 使い方
 
 ```bash
-python scripts/run_collect.py --areas tokyo --source suumo --limit 5
+# まず小さく動作確認 (各 5 件)
+python scripts/run_collect.py --tab takken  --areas tokyo --limit 5
+python scripts/run_collect.py --tab shigyo  --areas tokyo --limit 5
+python scripts/run_collect.py --tab souzoku --areas tokyo --limit 5
+python scripts/run_collect.py --tab chintai --areas tokyo --limit 5
+python scripts/run_collect.py --tab hoken   --areas tokyo --limit 5
+
+# 本番 (限度は limits.yaml の値、東京都 100 件)
+python scripts/run_collect.py --tab takken  --areas tokyo
+python scripts/run_collect.py --tab shigyo  --areas tokyo
+python scripts/run_collect.py --tab souzoku --areas tokyo
+python scripts/run_collect.py --tab chintai --areas tokyo
+python scripts/run_collect.py --tab hoken   --areas tokyo
+
+# トラブルシュート: ブラウザを可視化して目視確認
+python scripts/run_collect.py --tab takken --areas tokyo --limit 5 --headful
 ```
 
-- 5 社分だけ収集して `data/brokers.csv` に追記します
-- 出力は UTF-8 (BOM 付き)。Excel で文字化けせず開けます
+### タブ一覧
 
-### 2. 本番収集(首都圏 4 都県 × 3 ソース)
+| `--tab` | Excel タブ名 | 検索キーワード |
+|---------|-------------|---------------|
+| `takken`  | 宅建業者 | 不動産 / 不動産買取 / 不動産仲介 |
+| `shigyo`  | 士業 | 司法書士 / 税理士 / 弁護士 / 行政書士 |
+| `souzoku` | 相続専門業者 | 遺品整理 / 相続コンサル / 相続専門 |
+| `chintai` | 賃貸管理会社 | 賃貸管理会社 / 賃貸管理 / プロパティマネジメント |
+| `hoken`   | 保険代理店 | 保険代理店 / 生命保険代理店 / 損害保険代理店 |
 
-```bash
-python scripts/run_collect.py \
-    --areas tokyo,kanagawa,saitama,chiba \
-    --source suumo,athome,homes
+### 出力
+
+- `data/sales_list.xlsx` の「宅建業者」タブに 1 件 1 行で UPSERT
+- UPSERT キー: `(都道府県, 業者名・事務所名)`
+- 再実行しても重複行は追加されず、空→値の上書きのみ行う
+
+### Excel スキーマ (全タブ共通・11 列)
+
+| # | 列名 | 備考 |
+|---|------|------|
+| 1 | 都道府県 | 東京都 / 神奈川県 / 埼玉県 / 千葉県 |
+| 2 | 業者名・事務所名 | Serper Places の title |
+| 3 | 担当者名 | HP から抽出できた場合のみ |
+| 4 | メールアドレス | 複数は `;` 区切り |
+| 5 | 問い合わせフォームURL | 取得できた場合のみ |
+| 6 | HP | Serper Places の website |
+| 7 | 出典 | 例: `GoogleMaps:不動産` |
+| 8 | ステータス | STEP 10 で更新 |
+| 9 | 送信日時 | STEP 10 で更新 |
+| 10 | 送信方式 | mail / form (STEP 10) |
+| 11 | エラー | STEP 10 で更新 |
+
+### CLI オプション
+
+```
+--tab takken               対象タブ (STEP 1 では takken のみ)
+--areas tokyo              収集エリア (カンマ区切り)
+--limit N                  各エリアの件数上限を上書き (0 で無制限)
+--skip-contacts            HP からの連絡先抽出をスキップ (Serper のみ)
+--output PATH              出力 xlsx (default: data/sales_list.xlsx)
+--log-dir DIR              ログ出力先 (default: logs)
 ```
 
-### 3. 出力 CSV フォーマット (5 列)
+### 件数制御 (config/limits.yaml)
 
-| 列 | 値の例 |
-|---|---|
-| 会社名 | 株式会社〇〇不動産 |
-| 担当者名 | 代表取締役 山田太郎 (取得できなければ空) |
-| HPリンク | https://example.co.jp/ |
-| メールアドレス | info@example.co.jp (複数なら `;` 区切り、無ければ空) |
-| 問い合わせフォームリンク | https://example.co.jp/contact/ |
+```yaml
+takken:
+  tokyo: 100
+  kanagawa: 0     # STEP 2 で 100 に引き上げる
+  saitama: 0
+  chiba: 0
+```
 
-キーは「会社名 + HP リンク」。再実行時は重複行を UPSERT します。
+`0` のエリアは `--limit` 指定が無ければスキップされる。
 
-## 将来対応: メール一斉送信
+### 実行ログ
 
-`scripts/run_send_mail.py` は現在スタブです。次回以降に以下を実装予定:
+`logs/run_YYYYMMDD_HHMMSS.log` に収集状況を記録する (.gitignore 対象)。
 
-- 入力: `data/brokers.csv` + `templates/outreach_ja.txt` + `.env` の SMTP 情報
-- 1 通ずつ **個別 To:** で送信(BCC 一斉送信は行わない)
-- 送信間隔: 最短 5 秒/通 + ジッター
-- `List-Unsubscribe` ヘッダを付与
-- `--dry-run` で実送信せず確認可能
-- 送信履歴は `data/send_log.csv` に別ファイルで記録
+---
 
-### 送信前の注意
+## 注意
 
-- 送信先は **業者 (B2B)** に限定してください
-- 自社の宅建免許番号・住所・連絡先を本文末に必ず明記
-- 受信拒否の意思表示を受けた宛先は `data/brokers.csv` から除外する運用としてください
-
-## 実行ログ
-
-実行するたびに `logs/run_YYYYMMDD_HHMMSS.log` に取得件数・スキップ理由を記録します (`.gitignore` 対象)。
-
-## 注意: 実サイトアクセスなしのスキーマ確認
-
-`data/brokers_sample.csv` に 3 行のダミーデータがあります。ネットワーク不要で取り込み挙動 (Excel/スプレッドシート) を確認するのに使ってください。
+- `data/sales_list.xlsx` は `.gitignore` で除外 (個人情報を含むため)
+- Serper の Places API はプランに応じた月間クエリ上限があります
+- HP からの連絡先抽出は robots.txt を尊重し、取得できないサイトはスキップ

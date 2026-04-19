@@ -10,6 +10,7 @@ venv/
 logs/
 data/brokers.csv
 data/send_log.csv
+data/sales_list.xlsx
 .cache/
 
 # OS/Editor

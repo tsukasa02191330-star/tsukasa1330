@@ -1,0 +1,103 @@
+# 宅建業者シード (東京都)
+# メール取得率目安: 40-55% (中小独立系は高め、チェーン系は問い合わせフォーム主体)
+# 中小・独立系の不動産会社に絞った方がメールアドレスが取れやすい。
+
+- name: 株式会社センチュリー21東京
+  url: https://www.century21.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社エイブル
+  url: https://www.able.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社アパマンショップ
+  url: https://www.apaman.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社ピタットハウス東京
+  url: https://www.pitathouse.com/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 有限会社マルヤ不動産
+  url: https://www.maruya-fudosan.co.jp/
+  pref: 東京都
+  category: 不動産売買
+
+- name: 株式会社東京リアルエステート
+  url: https://www.tokyo-realestate.jp/
+  pref: 東京都
+  category: 不動産買取
+
+- name: 株式会社プロパティエージェント
+  url: https://www.propertyagent.co.jp/
+  pref: 東京都
+  category: 不動産投資
+
+- name: 株式会社GA technologies
+  url: https://www.renosy.com/
+  pref: 東京都
+  category: 不動産テック
+
+- name: 株式会社日本エスリード
+  url: https://www.eslead.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社カチタス
+  url: https://www.katitas.jp/
+  pref: 東京都
+  category: 不動産買取
+
+- name: 株式会社タカラレーベン
+  url: https://www.leben.co.jp/
+  pref: 東京都
+  category: 不動産開発
+
+- name: 株式会社ハウスドゥ
+  url: https://housedo.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社アース・エステート
+  url: https://www.earth-estate.jp/
+  pref: 東京都
+  category: 不動産売買
+
+- name: 日本住宅流通株式会社
+  url: https://www.nihon-jutaku.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社オープンハウス
+  url: https://oh.openhouse-group.com/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社ランドネット
+  url: https://www.landnet.co.jp/
+  pref: 東京都
+  category: 不動産投資
+
+- name: 株式会社スター・マイカ
+  url: https://www.starmica.co.jp/
+  pref: 東京都
+  category: 不動産買取
+
+- name: 株式会社アドバンス・シティ
+  url: https://www.advance-city.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社東急リバブル
+  url: https://www.livable.co.jp/
+  pref: 東京都
+  category: 不動産仲介
+
+- name: 株式会社三井不動産リアルティ
+  url: https://www.mitsui-hanbai.co.jp/
+  pref: 東京都
+  category: 不動産仲介

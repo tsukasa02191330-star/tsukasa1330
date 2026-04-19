@@ -1,0 +1,77 @@
+# 相続専門業者シード (東京都)
+# メール取得率目安: 50-65% (専門性を打ち出している事務所は HP に連絡先あり)
+
+- name: 税理士法人チェスター (相続専門)
+  url: https://chester-tax.com/
+  pref: 東京都
+  category: 相続専門
+
+- name: 相続税の相談室
+  url: https://souzoku-zei.jp/
+  pref: 東京都
+  category: 相続コンサル
+
+- name: 株式会社ベアーズ (遺品整理)
+  url: https://www.bears.co.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: 遺品整理の生前整理業者えんの木
+  url: https://enno-ki.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: 株式会社ブルークリーン
+  url: https://www.blue-clean.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: キーパーズ株式会社
+  url: https://www.keepers.co.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: 一般社団法人日本相続知財センター
+  url: https://chizai-souzoku.jp/
+  pref: 東京都
+  category: 相続コンサル
+
+- name: 相続専門の税理士事務所 レガシィ
+  url: https://www.legacy.co.jp/
+  pref: 東京都
+  category: 相続専門
+
+- name: 株式会社アールプランナー
+  url: https://www.rplanner.jp/
+  pref: 東京都
+  category: 相続コンサル
+
+- name: 東京相続センター
+  url: https://tokyo-souzoku.jp/
+  pref: 東京都
+  category: 相続コンサル
+
+- name: 株式会社テルツ (遺品整理)
+  url: https://www.telus.co.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: 絆サービス (遺品整理)
+  url: https://www.kizuna-service.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: リスタート株式会社 (遺品整理)
+  url: https://restart-tokyo.jp/
+  pref: 東京都
+  category: 遺品整理
+
+- name: 相続コンシェルジュ
+  url: https://souzoku-concierge.jp/
+  pref: 東京都
+  category: 相続コンサル
+
+- name: 合同会社 東京相続パートナーズ
+  url: https://tokyo-souzoku-partners.jp/
+  pref: 東京都
+  category: 相続コンサル
